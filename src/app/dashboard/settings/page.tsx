@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Save, Loader2, User, Building, Globe, Phone, Mail } from "lucide-react";
+import { Save, Loader2, Building, Globe, Phone, Mail } from "lucide-react";
 
 export default function SettingsPage() {
     const [orgName, setOrgName] = useState("");
@@ -117,8 +117,8 @@ export default function SettingsPage() {
                                     type="button"
                                     onClick={() => setOrgType(type.value)}
                                     className={`rounded-lg border px-3 py-2 text-sm transition-all ${orgType === type.value
-                                            ? "border-brand-500 bg-brand-500/10 text-brand-300"
-                                            : "border-surface-700/50 text-surface-400 hover:border-surface-600"
+                                        ? "border-brand-500 bg-brand-500/10 text-brand-300"
+                                        : "border-surface-700/50 text-surface-400 hover:border-surface-600"
                                         }`}
                                 >
                                     {type.label}

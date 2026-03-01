@@ -1,4 +1,4 @@
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -16,10 +16,10 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the build.
-# ENV NEXT_TELEMETRY_DISABLED 1
+# Next.js needs NEXT_PUBLIC_ vars at build time to inline them
+ENV NEXT_PUBLIC_SUPABASE_URL=https://qbtpjxulhzaderwtfhrb.supabase.co
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_vupTSOVbRfu-9ACbeLucyA_a0U0Eki4
+ENV NEXT_PUBLIC_DOMAIN=sponsormything.com
 
 RUN npm run build
 

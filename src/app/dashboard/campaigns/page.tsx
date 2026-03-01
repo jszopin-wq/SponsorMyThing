@@ -56,9 +56,7 @@ export default async function CampaignsPage() {
                             <p className="mt-1 text-sm text-surface-400 line-clamp-2">{campaign.description}</p>
                             <div className="mt-4 flex items-center justify-between">
                                 <span className="text-xs text-surface-500">
-                                    {(campaign as Record<string, unknown>).prospects &&
-                                        Array.isArray((campaign as Record<string, unknown>).prospects) &&
-                                        ((campaign as Record<string, unknown>).prospects as Array<{ count: number }>)[0]?.count || 0} prospects
+                                    {(campaign.prospects as unknown as Array<{ count: number }>)?.[0]?.count || 0} prospects
                                 </span>
                                 <ArrowRight className="h-4 w-4 text-surface-500 group-hover:text-brand-400 group-hover:translate-x-1 transition-all" />
                             </div>

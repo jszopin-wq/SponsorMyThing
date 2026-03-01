@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { Mail, Send, Edit3, Trash2, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Mail, Send, Edit3, CheckCircle, XCircle, Clock } from "lucide-react";
 
 export default async function OutreachPage() {
     const supabase = await createClient();
