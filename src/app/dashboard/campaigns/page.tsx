@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Plus, Megaphone, ArrowRight } from "lucide-react";
+import { DeleteCampaignButton } from "@/components/campaigns/DeleteCampaignButton";
 
 export default async function CampaignsPage() {
     const supabase = await createClient();
@@ -36,31 +37,32 @@ export default async function CampaignsPage() {
             ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {campaigns.map((campaign, i) => (
-                        <Link
-                            key={campaign.id}
-                            href={`/dashboard/campaigns/${campaign.id}`}
-                            className="glass-card glass-card-hover p-6 group"
-                            style={{ animationDelay: `${i * 50}ms` }}
-                        >
-                            <div className="flex items-start justify-between mb-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/15">
-                                    <Megaphone className="h-5 w-5 text-brand-400" />
+                        <div key={campaign.id} className="relative group animate-in fade-in slide-in-from-bottom-4 fill-mode-both" style={{ animationDelay: `${i * 50}ms` }}>
+                            <DeleteCampaignButton campaignId={campaign.id} />
+                            <Link
+                                href={`/dashboard/campaigns/${campaign.id}`}
+                                className="glass-card glass-card-hover p-6 block h-full transition-all"
+                            >
+                                <div className="flex items-start justify-between mb-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/15">
+                                        <Megaphone className="h-5 w-5 text-brand-400" />
+                                    </div>
+                                    <span className={`badge ${campaign.status === "active" ? "badge-active" : "badge-draft"}`}>
+                                        {campaign.status}
+                                    </span>
                                 </div>
-                                <span className={`badge ${campaign.status === "active" ? "badge-active" : "badge-draft"}`}>
-                                    {campaign.status}
-                                </span>
-                            </div>
-                            <h3 className="font-semibold text-surface-100 group-hover:text-brand-300 transition-colors">
-                                {campaign.name}
-                            </h3>
-                            <p className="mt-1 text-sm text-surface-400 line-clamp-2">{campaign.description}</p>
-                            <div className="mt-4 flex items-center justify-between">
-                                <span className="text-xs text-surface-500">
-                                    {(campaign.prospects as unknown as Array<{ count: number }>)?.[0]?.count || 0} prospects
-                                </span>
-                                <ArrowRight className="h-4 w-4 text-surface-500 group-hover:text-brand-400 group-hover:translate-x-1 transition-all" />
-                            </div>
-                        </Link>
+                                <h3 className="font-semibold text-surface-100 group-hover:text-brand-300 transition-colors">
+                                    {campaign.name}
+                                </h3>
+                                <p className="mt-1 text-sm text-surface-400 line-clamp-2">{campaign.description}</p>
+                                <div className="mt-4 flex items-center justify-between">
+                                    <span className="text-xs text-surface-500">
+                                        {(campaign.prospects as unknown as Array<{ count: number }>)?.[0]?.count || 0} prospects
+                                    </span>
+                                    <ArrowRight className="h-4 w-4 text-surface-500 group-hover:text-brand-400 group-hover:translate-x-1 transition-all" />
+                                </div>
+                            </Link>
+                        </div>
                     ))}
                 </div>
             )}
