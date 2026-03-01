@@ -51,10 +51,15 @@ export async function GET(request: NextRequest) {
         const overpassData = await overpassRes.json();
 
         // Step 3: Format the results
+        interface OverpassElement {
+            id: number;
+            tags?: Record<string, string>;
+        }
+
         const rawResults = overpassData.elements
-            .filter((el: any) => el.tags && el.tags.name)
-            .map((el: any) => {
-                const tags = el.tags;
+            .filter((el: OverpassElement) => el.tags && el.tags.name)
+            .map((el: OverpassElement) => {
+                const tags = el.tags || {};
                 const email = tags.email || tags["contact:email"];
 
                 // If the user specified a category, roughly filter for it (Optional)
@@ -75,7 +80,7 @@ export async function GET(request: NextRequest) {
                     email: email, // We pass the email we found directly!
                 };
             })
-            .filter((item: any) => item !== null && item.email); // STRICTLY return only those with emails!
+            .filter((item: Record<string, unknown> | null) => item !== null && item.email); // STRICTLY return only those with emails!
 
         return NextResponse.json({ results: rawResults.slice(0, 50) }); // Limit to 50
     } catch (error) {
