@@ -12,79 +12,76 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    const defaultCategories = [
-        "Hardware Store", "Pizza Restaurant", "Auto Repair", "Dentist",
-        "Insurance Agency", "Real Estate Agent", "Accountant", "Florist",
-        "Bakery", "Veterinarian", "Gym", "Car Dealer"
-    ];
-
-    const categories = categoryParam ? categoryParam.split(",") : defaultCategories;
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-
-    if (!apiKey) {
-        // Return mock data when no API key is configured
-        const allMockResults = categories.flatMap(cat => generateMockResults(cat.trim(), location));
-        return NextResponse.json({
-            results: allMockResults,
-            mock: true,
-        });
-    }
-
     try {
-        const allResults: Record<string, unknown>[] = [];
+        // Step 1: Geocode the location to a bounding box using Nominatim (Free)
+        const geocodeRes = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`,
+            { headers: { "User-Agent": "SponsorMyThing/1.0" } }
+        );
+        const geocodeData = await geocodeRes.json();
 
-        // We limit to 3 categories if searching all to avoid API rate limits/timeouts 
-        // in a simple loop. In a real app, you'd chunk this or use the newer Places API.
-        const searchCategories = categories.slice(0, 3);
-
-        for (const cat of searchCategories) {
-            const query = encodeURIComponent(`${cat.trim()} near ${location}`);
-            const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${query}&key=${apiKey}`;
-
-            const res = await fetch(url);
-            const data = await res.json();
-
-            if (data.status === "OK" && data.results) {
-                const formattedResults = data.results.slice(0, 10).map((place: Record<string, unknown>) => ({
-                    place_id: place.place_id,
-                    name: place.name,
-                    address: place.formatted_address,
-                    rating: place.rating,
-                    category: cat.trim(),
-                    phone: null,
-                    website: null,
-                }));
-                allResults.push(...formattedResults);
-            }
+        if (!geocodeData || geocodeData.length === 0) {
+            return NextResponse.json({ error: "Location not found. Try a different ZIP code or city." }, { status: 404 });
         }
 
-        return NextResponse.json({ results: allResults });
+        const bbox = geocodeData[0].boundingbox; // [latMin, latMax, lonMin, lonMax]
+        // Overpass API bounding box format is: south,west,north,east 
+        const overpassBbox = `${bbox[0]},${bbox[2]},${bbox[1]},${bbox[3]}`;
+
+        // Step 2: Query Overpass API for real businesses that strictly HAVE email addresses
+        // We look for nodes that have either 'email' or 'contact:email', and are a 'shop', 'amenity', or 'office'.
+        const query = `
+            [out:json][timeout:25];
+            (
+              node["email"](${overpassBbox});
+              node["contact:email"](${overpassBbox});
+              way["email"](${overpassBbox});
+              way["contact:email"](${overpassBbox});
+            );
+            out body;
+            >;
+            out skel qt;
+        `;
+
+        const overpassRes = await fetch("https://overpass-api.de/api/interpreter", {
+            method: "POST",
+            body: query,
+        });
+
+        const overpassData = await overpassRes.json();
+
+        // Step 3: Format the results
+        const rawResults = overpassData.elements
+            .filter((el: any) => el.tags && el.tags.name)
+            .map((el: any) => {
+                const tags = el.tags;
+                const email = tags.email || tags["contact:email"];
+
+                // If the user specified a category, roughly filter for it (Optional)
+                const businessCategory = tags.shop || tags.amenity || tags.office || "Local Business";
+
+                if (categoryParam && !businessCategory.toLowerCase().includes(categoryParam.toLowerCase())) {
+                    return null; // Skip if it doesn't match the requested category somewhat
+                }
+
+                return {
+                    place_id: `osm_${el.id}`,
+                    name: tags.name,
+                    address: tags["addr:street"] ? `${tags["addr:housenumber"] || ""} ${tags["addr:street"]}, ${tags["addr:city"] || location}`.trim() : location,
+                    rating: null, // OSM doesn't have ratings natively
+                    category: businessCategory.charAt(0).toUpperCase() + businessCategory.slice(1).replace("_", " "),
+                    phone: tags.phone || tags["contact:phone"] || null,
+                    website: tags.website || tags["contact:website"] || null,
+                    email: email, // We pass the email we found directly!
+                };
+            })
+            .filter((item: any) => item !== null && item.email); // STRICTLY return only those with emails!
+
+        return NextResponse.json({ results: rawResults.slice(0, 50) }); // Limit to 50
     } catch (error) {
-        console.error("Places API error:", error);
-        return NextResponse.json({ error: "Failed to search for businesses" }, { status: 500 });
+        console.error("OSM API error:", error);
+        return NextResponse.json({ error: "Failed to search for live businesses" }, { status: 500 });
     }
 }
 
-// Mock data for development without API key
-function generateMockResults(category: string, location: string) {
-    const mockBusinesses = [
-        { name: `${category} Express`, rating: 4.5 },
-        { name: `${location} ${category} Co.`, rating: 4.2 },
-        { name: `Premier ${category} Services`, rating: 4.8 },
-        { name: `Family ${category} & More`, rating: 4.1 },
-        { name: `The ${category} Place`, rating: 3.9 },
-        { name: `${category} Depot of ${location}`, rating: 4.6 },
-        { name: `Main Street ${category}`, rating: 4.3 },
-        { name: `${location} Best ${category}`, rating: 4.7 },
-    ];
 
-    return mockBusinesses.map((biz, i) => ({
-        place_id: `mock_${i}_${Date.now()}`,
-        name: biz.name,
-        address: `${100 + i * 100} Main St, ${location}`,
-        phone: `(555) ${String(100 + i).padStart(3, "0")}-${String(4000 + i * 111).slice(0, 4)}`,
-        website: `https://www.${biz.name.toLowerCase().replace(/[^a-z0-9]/g, "")}.com`,
-        category: category,
-        rating: biz.rating,
-    }));
-}
