@@ -8,11 +8,21 @@ export default async function DashboardPage() {
 
     const { data: { user } } = await supabase.auth.getUser();
     const userIsAdmin = isAdmin(user?.email);
-    const { data: profile } = await supabase
+    let { data: profile } = await supabase
         .from("profiles")
         .select("org_name")
         .eq("id", user?.id ?? "")
         .single();
+
+    // Auto-create profile for legacy accounts missing a profile
+    if (!profile && user) {
+        await supabase.from("profiles").insert({
+            id: user.id,
+            contact_email: user.email,
+            org_name: "",
+        });
+        profile = { org_name: "" };
+    }
 
     const { count: campaignCount } = await supabase
         .from("campaigns")
