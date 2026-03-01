@@ -1,11 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
+import { isAdmin } from "@/lib/admin";
 import Link from "next/link";
-import { Megaphone, Search, Mail, ArrowRight, Plus, TrendingUp, Users } from "lucide-react";
+import { Megaphone, Search, Mail, ArrowRight, Plus, TrendingUp, Users, Shield } from "lucide-react";
 
 export default async function DashboardPage() {
     const supabase = await createClient();
 
     const { data: { user } } = await supabase.auth.getUser();
+    const userIsAdmin = isAdmin(user?.email);
     const { data: profile } = await supabase
         .from("profiles")
         .select("org_name")
@@ -57,9 +59,17 @@ export default async function DashboardPage() {
         <div className="animate-fade-in">
             {/* Header */}
             <div className="mb-8">
-                <h1 className="text-3xl font-bold text-surface-100">
-                    Welcome back, <span className="gradient-text">{orgName}</span>
-                </h1>
+                <div className="flex items-center gap-3">
+                    <h1 className="text-3xl font-bold text-surface-100">
+                        Welcome back, <span className="gradient-text">{orgName}</span>
+                    </h1>
+                    {userIsAdmin && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-semibold text-amber-400 border border-amber-500/20">
+                            <Shield className="h-3 w-3" />
+                            Admin
+                        </span>
+                    )}
+                </div>
                 <p className="mt-1 text-surface-400">
                     Here&apos;s what&apos;s happening with your sponsorship outreach.
                 </p>
