@@ -46,23 +46,49 @@ body {
 
 /* ── Animations ───────────────────────────────────────────── */
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slide-in-left {
-  from { opacity: 0; transform: translateX(-16px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.15); }
-  50% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.3); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
+  }
+
+  50% {
+    box-shadow: 0 0 40px rgba(99, 102, 241, 0.3);
+  }
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .animate-fade-in {
@@ -161,6 +187,15 @@ body {
   font-size: 0.875rem;
   transition: all 0.2s ease;
   outline: none;
+}
+
+/* Ensure icon inputs have enough left padding */
+.input-field.pl-10 {
+  padding-left: 2.5rem !important;
+}
+
+.input-field.pl-7 {
+  padding-left: 1.75rem !important;
 }
 
 .input-field::placeholder {
