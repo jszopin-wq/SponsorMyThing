@@ -48,6 +48,7 @@ export default function ProspectSearchPage() {
     const campaignId = params.id as string;
 
     const [location, setLocation] = useState("");
+    const [distance, setDistance] = useState("5");
     const [category, setCategory] = useState("");
     const [results, setResults] = useState<PlaceResult[]>([]);
     const [searching, setSearching] = useState(false);
@@ -61,7 +62,7 @@ export default function ProspectSearchPage() {
 
         try {
             const res = await fetch(
-                `/api/prospects/search?location=${encodeURIComponent(location)}&category=${encodeURIComponent(category)}`
+                `/api/prospects/search?location=${encodeURIComponent(location)}&distance=${distance}&category=${encodeURIComponent(category)}`
             );
             const data = await res.json();
 
@@ -140,6 +141,27 @@ export default function ProspectSearchPage() {
                             </div>
                         </div>
                         <div>
+                            <label htmlFor="distance" className="mb-1.5 block text-sm font-medium text-surface-300">
+                                Distance
+                            </label>
+                            <div className="relative">
+                                <select
+                                    id="distance"
+                                    value={distance}
+                                    onChange={(e) => setDistance(e.target.value)}
+                                    className="input-field appearance-none"
+                                    required
+                                >
+                                    <option value="1">1 Mile</option>
+                                    <option value="2">2 Miles</option>
+                                    <option value="5">5 Miles</option>
+                                    <option value="10">10 Miles</option>
+                                    <option value="25">25 Miles</option>
+                                    <option value="50">50 Miles</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="sm:col-span-2">
                             <label htmlFor="category" className="mb-1.5 flex items-center justify-between text-sm font-medium text-surface-300">
                                 <span>Specific Business Type</span>
                                 <span className="text-xs text-surface-500 font-normal">Optional</span>

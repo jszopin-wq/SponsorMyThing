@@ -65,7 +65,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <div className="flex h-16 items-center justify-between border-b border-surface-800/50 px-4">
                     {!collapsed && (
                         <Link href="/dashboard" className="flex items-center gap-2">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-purple-500">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-orange-500">
                                 <Heart className="h-4 w-4 text-white" />
                             </div>
                             <span className="text-sm font-bold text-surface-100">
@@ -74,7 +74,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         </Link>
                     )}
                     {collapsed && (
-                        <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-purple-500">
+                        <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-orange-500">
                             <Heart className="h-4 w-4 text-white" />
                         </div>
                     )}

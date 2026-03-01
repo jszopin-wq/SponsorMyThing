@@ -6,7 +6,7 @@ const steps = [
         icon: Search,
         title: "Prospect",
         description: "Search for local businesses near you using Google Maps. Find hardware stores, restaurants, and more.",
-        color: "from-blue-500 to-cyan-400",
+        color: "from-red-500 to-orange-400",
     },
     {
         icon: Sparkles,
@@ -41,7 +41,7 @@ export default function HomePage() {
             <nav className="fixed top-0 left-0 right-0 z-50 border-b border-surface-800/50 bg-surface-950/80 backdrop-blur-xl">
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
                     <Link href="/" className="flex items-center gap-2">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-purple-500">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-orange-500">
                             <Heart className="h-5 w-5 text-white" />
                         </div>
                         <span className="text-lg font-bold text-surface-100">

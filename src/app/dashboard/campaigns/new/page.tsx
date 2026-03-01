@@ -84,7 +84,7 @@ export default function NewCampaignPage() {
 
             <div className="glass-card p-8">
                 <div className="mb-6 flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-purple-500">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-orange-500">
                         <Megaphone className="h-5 w-5 text-white" />
                     </div>
                     <div>

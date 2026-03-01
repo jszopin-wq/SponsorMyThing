@@ -4,6 +4,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const location = searchParams.get("location");
     const categoryParam = searchParams.get("category");
+    const distanceParam = searchParams.get("distance");
 
     if (!location) {
         return NextResponse.json(
@@ -24,19 +25,23 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: "Location not found. Try a different ZIP code or city." }, { status: 404 });
         }
 
-        const bbox = geocodeData[0].boundingbox; // [latMin, latMax, lonMin, lonMax]
-        // Overpass API bounding box format is: south,west,north,east 
-        const overpassBbox = `${bbox[0]},${bbox[2]},${bbox[1]},${bbox[3]}`;
+        // Get Lat and Lon
+        const lat = geocodeData[0].lat;
+        const lon = geocodeData[0].lon;
+
+        // Convert distance from miles to meters (default to 5 miles if not specified)
+        const miles = distanceParam ? parseFloat(distanceParam) : 5;
+        const radiusInMeters = Math.round(miles * 1609.34);
 
         // Step 2: Query Overpass API for real businesses that strictly HAVE email addresses
         // We look for nodes that have either 'email' or 'contact:email', and are a 'shop', 'amenity', or 'office'.
         const query = `
             [out:json][timeout:25];
             (
-              node["email"](${overpassBbox});
-              node["contact:email"](${overpassBbox});
-              way["email"](${overpassBbox});
-              way["contact:email"](${overpassBbox});
+              node["email"](around:${radiusInMeters},${lat},${lon});
+              node["contact:email"](around:${radiusInMeters},${lat},${lon});
+              way["email"](around:${radiusInMeters},${lat},${lon});
+              way["contact:email"](around:${radiusInMeters},${lat},${lon});
             );
             out body;
             >;

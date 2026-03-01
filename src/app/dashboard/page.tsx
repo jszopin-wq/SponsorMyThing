@@ -47,14 +47,14 @@ export default async function DashboardPage() {
             icon: Plus,
             title: "New Campaign",
             description: "Start a new sponsorship or donation campaign",
-            color: "from-brand-500 to-purple-500",
+            color: "from-brand-500 to-orange-500",
         },
         {
             href: "/dashboard/campaigns",
             icon: Search,
             title: "Find Prospects",
             description: "Search for local businesses near you",
-            color: "from-blue-500 to-cyan-400",
+            color: "from-red-500 to-orange-400",
         },
         {
             href: "/dashboard/outreach",
