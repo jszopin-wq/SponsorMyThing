@@ -238,7 +238,7 @@ export default function ProspectSearchPage() {
                                 </div>
 
                                 <div className="grid gap-3 sm:grid-cols-2">
-                                    {catResults.map((place, i) => (
+                                    {catResults.map((place) => (
                                         <div
                                             key={place.place_id}
                                             className="glass-card p-4 flex flex-col h-full"
