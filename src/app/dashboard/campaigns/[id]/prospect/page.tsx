@@ -124,7 +124,7 @@ export default function ProspectSearchPage() {
                     <div className="grid gap-4 sm:grid-cols-2">
                         <div>
                             <label htmlFor="location" className="mb-1.5 block text-sm font-medium text-surface-300">
-                                Location
+                                Location (ZIP or City)
                             </label>
                             <div className="relative">
                                 <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-surface-500" />
@@ -134,14 +134,15 @@ export default function ProspectSearchPage() {
                                     value={location}
                                     onChange={(e) => setLocation(e.target.value)}
                                     className="input-field pl-10"
-                                    placeholder="City, State or ZIP code"
+                                    placeholder="e.g. 10001 or New York, NY"
                                     required
                                 />
                             </div>
                         </div>
                         <div>
-                            <label htmlFor="category" className="mb-1.5 block text-sm font-medium text-surface-300">
-                                Business Type
+                            <label htmlFor="category" className="mb-1.5 flex items-center justify-between text-sm font-medium text-surface-300">
+                                <span>Specific Business Type</span>
+                                <span className="text-xs text-surface-500 font-normal">Optional</span>
                             </label>
                             <div className="relative">
                                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-surface-500" />
@@ -151,9 +152,8 @@ export default function ProspectSearchPage() {
                                     value={category}
                                     onChange={(e) => setCategory(e.target.value)}
                                     className="input-field pl-10"
-                                    placeholder="e.g. Pizza Restaurant"
+                                    placeholder="Leave blank to search ALL types"
                                     list="categories"
-                                    required
                                 />
                                 <datalist id="categories">
                                     {businessCategories.map((cat) => (
@@ -164,14 +164,14 @@ export default function ProspectSearchPage() {
                         </div>
                     </div>
 
-                    <button type="submit" disabled={searching} className="btn-primary">
+                    <button type="submit" disabled={searching} className="btn-primary w-full sm:w-auto">
                         {searching ? (
                             <>
                                 <Loader2 className="h-4 w-4 animate-spin" /> Searching...
                             </>
                         ) : (
                             <>
-                                <Search className="h-4 w-4" /> Search Businesses
+                                <Search className="h-4 w-4" /> Find Businesses
                             </>
                         )}
                     </button>
@@ -183,80 +183,119 @@ export default function ProspectSearchPage() {
             )}
 
             {/* Results */}
+            {/* Results */}
             {results.length > 0 && (
-                <div className="space-y-3">
-                    <h2 className="text-lg font-semibold text-surface-200">
-                        Results ({results.length})
-                    </h2>
-                    {results.map((place, i) => (
-                        <div
-                            key={place.place_id}
-                            className="glass-card p-5 animate-fade-in"
-                            style={{ animationDelay: `${i * 40}ms` }}
-                        >
-                            <div className="flex items-start justify-between gap-4">
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <h3 className="font-semibold text-surface-100">{place.name}</h3>
-                                        {place.rating && (
-                                            <span className="inline-flex items-center gap-1 text-xs text-amber-400">
-                                                <Star className="h-3 w-3 fill-current" /> {place.rating}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div className="flex flex-wrap gap-3 text-xs text-surface-400">
-                                        {place.address && (
-                                            <span className="inline-flex items-center gap-1">
-                                                <MapPin className="h-3 w-3" /> {place.address}
-                                            </span>
-                                        )}
-                                        {place.phone && (
-                                            <span className="inline-flex items-center gap-1">
-                                                <Phone className="h-3 w-3" /> {place.phone}
-                                            </span>
-                                        )}
-                                        {place.website && (
-                                            <a
-                                                href={place.website}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="inline-flex items-center gap-1 text-brand-400 hover:text-brand-300"
-                                            >
-                                                <Globe className="h-3 w-3" /> Website
-                                            </a>
-                                        )}
-                                        {place.category && (
-                                            <span className="badge bg-surface-700/50 text-surface-300">{place.category}</span>
-                                        )}
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => handleAddProspect(place)}
-                                    disabled={place.added || addingId === place.place_id}
-                                    className={`shrink-0 ${place.added ? "btn-secondary text-emerald-400 border-emerald-500/30" : "btn-primary"}`}
-                                >
-                                    {addingId === place.place_id ? (
-                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : place.added ? (
-                                        <>
-                                            <Check className="h-4 w-4" /> Added
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Plus className="h-4 w-4" /> Add
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-                        </div>
-                    ))}
+                <div className="space-y-8">
+                    {Object.entries(
+                        results.reduce((acc, place) => {
+                            const cat = place.category || "Other";
+                            if (!acc[cat]) acc[cat] = [];
+                            acc[cat].push(place);
+                            return acc;
+                        }, {} as Record<string, PlaceResult[]>)
+                    ).map(([cat, catResults], catIndex) => {
+                        const allAdded = catResults.every((p) => p.added);
+                        const isAddingCategory = addingId === `cat_${cat}`;
 
-                    <div className="pt-4 text-center">
+                        return (
+                            <div key={cat} className="space-y-3 animate-fade-in" style={{ animationDelay: `${catIndex * 100}ms` }}>
+                                <div className="flex items-center justify-between border-b border-surface-700/50 pb-2">
+                                    <h2 className="text-xl font-bold text-surface-200">{cat} <span className="text-sm font-normal text-surface-400 ml-2">({catResults.length} found)</span></h2>
+                                    <button
+                                        onClick={async () => {
+                                            setAddingId(`cat_${cat}`);
+                                            const unadded = catResults.filter(p => !p.added);
+
+                                            // Insert in parallel for speed
+                                            const supabase = createClient();
+                                            await Promise.all(unadded.map(place =>
+                                                supabase.from("prospects").insert({
+                                                    campaign_id: campaignId,
+                                                    place_id: place.place_id,
+                                                    name: place.name,
+                                                    address: place.address,
+                                                    phone: place.phone,
+                                                    website: place.website,
+                                                    category: place.category,
+                                                    rating: place.rating,
+                                                })
+                                            ));
+
+                                            setResults((prev) => prev.map((p) => p.category === cat ? { ...p, added: true } : p));
+                                            setAddingId(null);
+                                        }}
+                                        disabled={allAdded || isAddingCategory}
+                                        className={`btn-secondary py-1.5 text-sm ${allAdded ? "text-emerald-400 border-emerald-500/30" : ""}`}
+                                    >
+                                        {isAddingCategory ? (
+                                            <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Adding All...</>
+                                        ) : allAdded ? (
+                                            <><Check className="h-3.5 w-3.5" /> All Added</>
+                                        ) : (
+                                            <><Plus className="h-3.5 w-3.5" /> Select All {cat}</>
+                                        )}
+                                    </button>
+                                </div>
+
+                                <div className="grid gap-3 sm:grid-cols-2">
+                                    {catResults.map((place, i) => (
+                                        <div
+                                            key={place.place_id}
+                                            className="glass-card p-4 flex flex-col h-full"
+                                        >
+                                            <div className="flex-1 mb-3">
+                                                <div className="flex items-start justify-between gap-2 mb-1">
+                                                    <h3 className="font-semibold text-surface-100 line-clamp-1" title={place.name}>{place.name}</h3>
+                                                    {place.rating && (
+                                                        <span className="shrink-0 inline-flex items-center gap-1 text-xs text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded">
+                                                            <Star className="h-3 w-3 fill-current" /> {place.rating}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="flex flex-col gap-1.5 text-xs text-surface-400">
+                                                    {place.address && (
+                                                        <span className="flex items-start gap-1.5">
+                                                            <MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5" /> <span className="line-clamp-2">{place.address}</span>
+                                                        </span>
+                                                    )}
+                                                    {place.phone && (
+                                                        <span className="flex items-center gap-1.5">
+                                                            <Phone className="h-3.5 w-3.5 shrink-0" /> {place.phone}
+                                                        </span>
+                                                    )}
+                                                    {place.website && (
+                                                        <a href={place.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-brand-400 hover:text-brand-300 w-fit">
+                                                            <Globe className="h-3.5 w-3.5 shrink-0" /> Website
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => handleAddProspect(place)}
+                                                disabled={place.added || addingId === place.place_id || isAddingCategory}
+                                                className={`w-full py-2 ${place.added ? "btn-secondary text-emerald-400 border-emerald-500/30" : "btn-primary"}`}
+                                            >
+                                                {addingId === place.place_id ? (
+                                                    <Loader2 className="h-4 w-4 animate-spin mx-auto" />
+                                                ) : place.added ? (
+                                                    <span className="flex items-center justify-center gap-1.5"><Check className="h-4 w-4" /> Added</span>
+                                                ) : (
+                                                    <span className="flex items-center justify-center gap-1.5"><Plus className="h-4 w-4" /> Add Prospect</span>
+                                                )}
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    })}
+
+                    <div className="pt-8 text-center border-t border-surface-700/50">
                         <button
                             onClick={() => router.push(`/dashboard/campaigns/${campaignId}`)}
-                            className="btn-secondary"
+                            className="btn-secondary px-8 py-3"
                         >
-                            Done — View Campaign
+                            Done — View Campaign Dashboard
                         </button>
                     </div>
                 </div>

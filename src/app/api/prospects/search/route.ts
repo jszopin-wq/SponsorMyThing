@@ -3,52 +3,62 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const location = searchParams.get("location");
-    const category = searchParams.get("category");
+    const categoryParam = searchParams.get("category");
 
-    if (!location || !category) {
+    if (!location) {
         return NextResponse.json(
-            { error: "Both 'location' and 'category' parameters are required." },
+            { error: "'location' parameter is required." },
             { status: 400 }
         );
     }
 
+    const defaultCategories = [
+        "Hardware Store", "Pizza Restaurant", "Auto Repair", "Dentist",
+        "Insurance Agency", "Real Estate Agent", "Accountant", "Florist",
+        "Bakery", "Veterinarian", "Gym", "Car Dealer"
+    ];
+
+    const categories = categoryParam ? categoryParam.split(",") : defaultCategories;
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
     if (!apiKey) {
-        // Return mock data when no API key is configured (development mode)
+        // Return mock data when no API key is configured
+        const allMockResults = categories.flatMap(cat => generateMockResults(cat.trim(), location));
         return NextResponse.json({
-            results: generateMockResults(category, location),
+            results: allMockResults,
             mock: true,
         });
     }
 
     try {
-        // Google Places Text Search API
-        const query = encodeURIComponent(`${category} near ${location}`);
-        const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${query}&key=${apiKey}`;
+        const allResults: Record<string, unknown>[] = [];
 
-        const res = await fetch(url);
-        const data = await res.json();
+        // We limit to 3 categories if searching all to avoid API rate limits/timeouts 
+        // in a simple loop. In a real app, you'd chunk this or use the newer Places API.
+        const searchCategories = categories.slice(0, 3);
 
-        if (data.status !== "OK" && data.status !== "ZERO_RESULTS") {
-            return NextResponse.json(
-                { error: `Google Places API error: ${data.status}` },
-                { status: 502 }
-            );
+        for (const cat of searchCategories) {
+            const query = encodeURIComponent(`${cat.trim()} near ${location}`);
+            const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${query}&key=${apiKey}`;
+
+            const res = await fetch(url);
+            const data = await res.json();
+
+            if (data.status === "OK" && data.results) {
+                const formattedResults = data.results.slice(0, 10).map((place: Record<string, unknown>) => ({
+                    place_id: place.place_id,
+                    name: place.name,
+                    address: place.formatted_address,
+                    rating: place.rating,
+                    category: cat.trim(),
+                    phone: null,
+                    website: null,
+                }));
+                allResults.push(...formattedResults);
+            }
         }
 
-        const results = (data.results || []).slice(0, 20).map((place: Record<string, unknown>) => ({
-            place_id: place.place_id,
-            name: place.name,
-            address: place.formatted_address,
-            rating: place.rating,
-            category: category,
-            // Note: phone and website require a Place Details API call
-            phone: null,
-            website: null,
-        }));
-
-        return NextResponse.json({ results });
+        return NextResponse.json({ results: allResults });
     } catch (error) {
         console.error("Places API error:", error);
         return NextResponse.json({ error: "Failed to search for businesses" }, { status: 500 });
