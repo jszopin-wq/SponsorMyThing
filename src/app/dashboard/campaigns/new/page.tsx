@@ -36,6 +36,21 @@ export default function NewCampaignPage() {
             return;
         }
 
+        // Ensure profile exists before inserting campaign (for legacy accounts)
+        const { data: profile } = await supabase
+            .from("profiles")
+            .select("id")
+            .eq("id", user.id)
+            .single();
+
+        if (!profile) {
+            await supabase.from("profiles").insert({
+                id: user.id,
+                contact_email: user.email,
+                org_name: "",
+            });
+        }
+
         const { data, error: insertError } = await supabase
             .from("campaigns")
             .insert({
@@ -105,8 +120,8 @@ export default function NewCampaignPage() {
                                     type="button"
                                     onClick={() => setCampaignType(type.value)}
                                     className={`rounded-xl border p-4 text-left transition-all ${campaignType === type.value
-                                            ? "border-brand-500 bg-brand-500/10"
-                                            : "border-surface-700/50 bg-surface-900/30 hover:border-surface-600"
+                                        ? "border-brand-500 bg-brand-500/10"
+                                        : "border-surface-700/50 bg-surface-900/30 hover:border-surface-600"
                                         }`}
                                 >
                                     <div className={`text-sm font-semibold ${campaignType === type.value ? "text-brand-300" : "text-surface-200"}`}>
