@@ -28,7 +28,6 @@ const navItems = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const router = useRouter();
-    const [collapsed, setCollapsed] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
 
     const handleLogout = async () => {
@@ -44,98 +43,98 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     };
 
     return (
-        <div className="flex min-h-screen">
-            {/* ── Mobile overlay ─────────────────────────────── */}
-            {mobileOpen && (
-                <div
-                    className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
-                    onClick={() => setMobileOpen(false)}
-                />
-            )}
-
-            {/* ── Sidebar ────────────────────────────────────── */}
-            <aside
-                className={clsx(
-                    "fixed top-0 left-0 z-50 flex h-screen flex-col border-r border-surface-800/50 bg-surface-950/95 backdrop-blur-xl transition-all duration-300 lg:relative",
-                    collapsed ? "w-[72px]" : "w-64",
-                    mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-                )}
-            >
-                {/* Logo */}
-                <div className="flex h-16 items-center justify-between border-b border-surface-800/50 px-4">
-                    {!collapsed && (
+        <div className="flex min-h-screen flex-col bg-surface-950">
+            {/* ── Top Navigation Bar ──────────────────────────── */}
+            <header className="sticky top-0 z-50 w-full border-b border-surface-800/50 bg-surface-950/95 backdrop-blur-xl">
+                <div className="flex h-16 items-center justify-between px-4 lg:px-8">
+                    <div className="flex items-center gap-8">
+                        {/* Logo */}
                         <Link href="/dashboard" className="flex items-center gap-2">
                             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-orange-500">
                                 <Heart className="h-4 w-4 text-white" />
                             </div>
-                            <span className="text-sm font-bold text-surface-100">
+                            <span className="text-sm font-bold text-surface-100 hidden sm:block">
                                 Sponsor<span className="gradient-text">MyThing</span>
                             </span>
                         </Link>
-                    )}
-                    {collapsed && (
-                        <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-orange-500">
-                            <Heart className="h-4 w-4 text-white" />
-                        </div>
-                    )}
-                    <button
-                        onClick={() => setCollapsed(!collapsed)}
-                        className="hidden rounded-lg p-1.5 text-surface-500 hover:bg-surface-800 hover:text-surface-300 transition-colors lg:block"
-                    >
-                        <ChevronLeft className={clsx("h-4 w-4 transition-transform", collapsed && "rotate-180")} />
-                    </button>
-                </div>
 
-                {/* Nav */}
-                <nav className="flex-1 space-y-1 p-3">
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            onClick={() => setMobileOpen(false)}
-                            className={clsx(
-                                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                                isActive(item.href)
-                                    ? "bg-brand-600/15 text-brand-300"
-                                    : "text-surface-400 hover:bg-surface-800/60 hover:text-surface-200"
-                            )}
+                        {/* Desktop Nav */}
+                        <nav className="hidden lg:flex items-center gap-1">
+                            {navItems.map((item) => (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className={clsx(
+                                        "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+                                        isActive(item.href)
+                                            ? "bg-brand-600/15 text-brand-300"
+                                            : "text-surface-400 hover:bg-surface-800/60 hover:text-surface-200"
+                                    )}
+                                >
+                                    <item.icon className={clsx("h-4 w-4 shrink-0", isActive(item.href) && "text-brand-400")} />
+                                    <span>{item.label}</span>
+                                </Link>
+                            ))}
+                        </nav>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        {/* Desktop Logout */}
+                        <button
+                            onClick={handleLogout}
+                            className="hidden lg:flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-surface-400 hover:bg-red-500/10 hover:text-red-400 transition-colors"
                         >
-                            <item.icon className={clsx("h-5 w-5 shrink-0", isActive(item.href) && "text-brand-400")} />
-                            {!collapsed && <span>{item.label}</span>}
-                        </Link>
-                    ))}
-                </nav>
+                            <LogOut className="h-4 w-4 shrink-0" />
+                            <span>Log Out</span>
+                        </button>
 
-                {/* Logout */}
-                <div className="border-t border-surface-800/50 p-3">
-                    <button
-                        onClick={handleLogout}
-                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-surface-400 hover:bg-red-500/10 hover:text-red-400 transition-colors"
-                    >
-                        <LogOut className="h-5 w-5 shrink-0" />
-                        {!collapsed && <span>Log Out</span>}
-                    </button>
+                        {/* Mobile Menu Toggle */}
+                        <button
+                            onClick={() => setMobileOpen(!mobileOpen)}
+                            className="rounded-lg p-2 text-surface-400 hover:bg-surface-800 hover:text-surface-200 lg:hidden"
+                        >
+                            <Menu className="h-5 w-5" />
+                        </button>
+                    </div>
                 </div>
-            </aside>
+
+                {/* Mobile Nav Dropdown */}
+                {mobileOpen && (
+                    <div className="border-t border-surface-800/50 bg-surface-950/95 lg:hidden px-4 py-4 space-y-4">
+                        <nav className="flex flex-col space-y-1">
+                            {navItems.map((item) => (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    onClick={() => setMobileOpen(false)}
+                                    className={clsx(
+                                        "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                                        isActive(item.href)
+                                            ? "bg-brand-600/15 text-brand-300"
+                                            : "text-surface-400 hover:bg-surface-800/60 hover:text-surface-200"
+                                    )}
+                                >
+                                    <item.icon className={clsx("h-5 w-5 shrink-0", isActive(item.href) && "text-brand-400")} />
+                                    <span>{item.label}</span>
+                                </Link>
+                            ))}
+                        </nav>
+                        <div className="border-t border-surface-800/50 pt-4">
+                            <button
+                                onClick={handleLogout}
+                                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-surface-400 hover:bg-red-500/10 hover:text-red-400 transition-colors"
+                            >
+                                <LogOut className="h-5 w-5 shrink-0" />
+                                <span>Log Out</span>
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </header>
 
             {/* ── Main Content ───────────────────────────────── */}
-            <main className="flex-1 overflow-auto">
-                {/* Top bar (mobile) */}
-                <div className="sticky top-0 z-30 flex h-14 items-center border-b border-surface-800/50 bg-surface-950/90 backdrop-blur-xl px-4 lg:hidden">
-                    <button
-                        onClick={() => setMobileOpen(true)}
-                        className="rounded-lg p-2 text-surface-400 hover:bg-surface-800 hover:text-surface-200"
-                    >
-                        <Menu className="h-5 w-5" />
-                    </button>
-                    <span className="ml-3 text-sm font-bold text-surface-100">
-                        Sponsor<span className="gradient-text">MyThing</span>
-                    </span>
-                </div>
-
-                <div className="p-6 lg:p-8">
-                    {children}
-                </div>
+            <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
+                {children}
             </main>
         </div>
     );
