@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/admin";
 import Link from "next/link";
-import { Megaphone, Search, Mail, ArrowRight, Plus, TrendingUp, Users, Shield } from "lucide-react";
+import { Megaphone, Search, Mail, ArrowRight, Plus, TrendingUp, Users, Shield, Play } from "lucide-react";
 
 export default async function DashboardPage() {
     const supabase = await createClient();
@@ -39,6 +39,15 @@ export default async function DashboardPage() {
         .select("*, campaigns!inner(user_id)", { count: "exact", head: true })
         .eq("campaigns.user_id", user?.id ?? "");
 
+    // Fetch the most recent campaign
+    const { data: recentCampaign } = await supabase
+        .from("campaigns")
+        .select("id, name")
+        .eq("user_id", user?.id ?? "")
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .single();
+
     const orgName = profile?.org_name || "Your Organization";
 
     const quickActions = [
@@ -64,6 +73,16 @@ export default async function DashboardPage() {
             color: "from-pink-500 to-rose-400",
         },
     ];
+
+    if (recentCampaign) {
+        quickActions.unshift({
+            href: `/dashboard/campaigns/${recentCampaign.id}`,
+            icon: Play,
+            title: `Resume: ${recentCampaign.name}`,
+            description: "Continue working on your most recent campaign",
+            color: "from-emerald-500 to-teal-400",
+        });
+    }
 
     return (
         <div className="animate-fade-in">
