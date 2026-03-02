@@ -100,9 +100,9 @@ export default async function OutreachPage() {
                                         <p className="text-sm text-surface-400 line-clamp-2">{email.body}</p>
                                     </div>
                                     <div className="flex items-center gap-2 shrink-0">
-                                        <button className="btn-secondary px-3 py-2" title="Edit">
+                                        <Link href={`/dashboard/outreach/${email.id}`} className="btn-secondary px-3 py-2" title="Edit">
                                             <Edit3 className="h-4 w-4" />
-                                        </button>
+                                        </Link>
                                         {email.status === "draft" && (
                                             <button className="btn-primary px-3 py-2" title="Approve & Send">
                                                 <Send className="h-4 w-4" />

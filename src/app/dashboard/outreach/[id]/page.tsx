@@ -25,6 +25,7 @@ export default async function EditOutreachPage({ params }: { params: Promise<{ i
 
     async function saveEmail(formData: FormData) {
         "use server";
+        const emailId = formData.get("id") as string;
         const subject = formData.get("subject") as string;
         const body = formData.get("body") as string;
 
@@ -32,7 +33,7 @@ export default async function EditOutreachPage({ params }: { params: Promise<{ i
         await supabaseServer
             .from("outreach_emails")
             .update({ subject, body })
-            .eq("id", id);
+            .eq("id", emailId);
 
         revalidatePath("/dashboard/outreach");
         redirect("/dashboard/outreach");
@@ -58,6 +59,7 @@ export default async function EditOutreachPage({ params }: { params: Promise<{ i
             </div>
 
             <form action={saveEmail} className="glass-card p-6 space-y-6">
+                <input type="hidden" name="id" value={id} />
                 <div>
                     <label htmlFor="subject" className="block text-sm font-medium text-surface-200 mb-2">
                         Subject Line

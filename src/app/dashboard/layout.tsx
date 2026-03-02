@@ -12,7 +12,6 @@ import {
     Mail,
     Settings,
     LogOut,
-    ChevronLeft,
     Menu,
 } from "lucide-react";
 import { clsx } from "clsx";
