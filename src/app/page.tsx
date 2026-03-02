@@ -4,7 +4,7 @@ import { Search, Sparkles, Mail, BarChart3, ArrowRight, Heart, Shield, Zap } fro
 const steps = [
     {
         icon: Search,
-        title: "Prospect",
+        title: "Search area businesses",
         description: "Search for local businesses near you using Google Maps. Find hardware stores, restaurants, and more.",
         color: "from-red-500 to-orange-400",
     },
