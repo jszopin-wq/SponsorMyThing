@@ -28,12 +28,6 @@ const steps = [
     },
 ];
 
-const stats = [
-    { value: "4x", label: "Higher response rate" },
-    { value: "10min", label: "Average setup time" },
-    { value: "500+", label: "Organizations served" },
-];
-
 export default function HomePage() {
     return (
         <div className="min-h-screen bg-surface-950">
@@ -93,15 +87,7 @@ export default function HomePage() {
                         </div>
                     </div>
 
-                    {/* Stats row */}
-                    <div className="mt-20 flex items-center justify-center gap-12 sm:gap-20">
-                        {stats.map((stat) => (
-                            <div key={stat.label} className="text-center">
-                                <div className="text-3xl font-extrabold gradient-text">{stat.value}</div>
-                                <div className="mt-1 text-sm text-surface-500">{stat.label}</div>
-                            </div>
-                        ))}
-                    </div>
+
                 </div>
             </section>
 
