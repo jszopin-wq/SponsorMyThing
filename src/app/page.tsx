@@ -10,7 +10,7 @@ const steps = [
     },
     {
         icon: Sparkles,
-        title: "Enrich",
+        title: "Email Database",
         description: "We scrape each business's website to understand what they do and what they care about.",
         color: "from-violet-500 to-purple-400",
     },
