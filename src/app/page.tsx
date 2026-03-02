@@ -80,14 +80,12 @@ export default function HomePage() {
                         </h1>
 
                         <p className="mx-auto mt-6 max-w-2xl text-lg text-surface-400 leading-relaxed">
-                            SponsorMyThing helps bring your events come to life by partnering with nearby
-                            businesses. We send AI-personalized sponsorship emails in seconds where you can
-                            receive sponsorships in minutes and not weeks.
+                            SponsorMyThing is a free service that helps bring your events to life by partnering with nearby businesses. Personalized AI generated emails are sent to local businesses in seconds. Start receiving sponsorships for your events today.
                         </p>
 
                         <div className="mt-10 flex items-center justify-center gap-4">
                             <Link href="/signup" className="btn-primary px-8 py-3 text-base">
-                                Start for Free <ArrowRight className="h-5 w-5" />
+                                Start Here <ArrowRight className="h-5 w-5" />
                             </Link>
                             <Link href="#how-it-works" className="btn-secondary px-8 py-3 text-base">
                                 See How It Works
