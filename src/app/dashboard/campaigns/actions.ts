@@ -27,3 +27,28 @@ export async function deleteCampaign(campaignId: string) {
 
     return { success: true };
 }
+
+export async function bulkDeleteCampaigns(campaignIds: string[]) {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        throw new Error("Unauthorized");
+    }
+
+    const { error } = await supabase
+        .from("campaigns")
+        .delete()
+        .in("id", campaignIds)
+        .eq("user_id", user.id);
+
+    if (error) {
+        console.error("Error bulk deleting campaigns:", error);
+        throw new Error("Failed to bulk delete campaigns");
+    }
+
+    revalidatePath("/dashboard/campaigns");
+
+    return { success: true };
+}

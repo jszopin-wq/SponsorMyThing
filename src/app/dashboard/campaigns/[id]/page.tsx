@@ -1,32 +1,114 @@
-import { createClient } from "@/lib/supabase/server";
-import { notFound } from "next/navigation";
+"use client";
+
+import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
-import { ArrowLeft, Search, Mail, Globe, Phone, MapPin, Star, ExternalLink } from "lucide-react";
+import { useEffect, useState, useCallback, use } from "react";
+import { ArrowLeft, Search, Mail, Globe, Phone, MapPin, Star, ExternalLink, Loader2, Play } from "lucide-react";
 
-export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+interface Campaign {
+    id: string;
+    name: string;
+    description: string;
+    status: string;
+    campaign_type: string;
+    goal_amount: number | null;
+    user_id: string;
+}
 
-    const { data: campaign } = await supabase
-        .from("campaigns")
-        .select("*")
-        .eq("id", id)
-        .eq("user_id", user?.id ?? "")
-        .single();
+interface Prospect {
+    id: string;
+    name: string;
+    category?: string;
+    rating?: number;
+    address?: string;
+    phone?: string;
+    website?: string;
+    enrichments?: Array<{ summary: string }> | { summary: string };
+    outreach_emails?: Array<{ id: string }>;
+}
 
-    if (!campaign) return notFound();
+export default function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
 
-    const { data: prospects } = await supabase
-        .from("prospects")
-        .select("*, enrichments(*), outreach_emails(*)")
-        .eq("campaign_id", id)
-        .order("created_at", { ascending: false });
+    const [campaign, setCampaign] = useState<Campaign | null>(null);
+    const [prospects, setProspects] = useState<Prospect[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isGeneratingBulk, setIsGeneratingBulk] = useState(false);
+    const [generatingId, setGeneratingId] = useState<string | null>(null);
 
-    const totalEmails = prospects?.reduce((sum, p) => {
-        const emails = p.outreach_emails as Array<Record<string, unknown>> | null;
-        return sum + (emails?.length ?? 0);
-    }, 0) ?? 0;
+    const loadData = useCallback(async () => {
+        // Load on client to safely handle state updates for buttons
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        const { data: campData } = await supabase
+            .from("campaigns")
+            .select("*")
+            .eq("id", id)
+            .eq("user_id", user?.id ?? "")
+            .single();
+
+        if (campData) setCampaign(campData);
+
+        const { data: prosData } = await supabase
+            .from("prospects")
+            .select("*, enrichments(*), outreach_emails(*)")
+            .eq("campaign_id", id)
+            .order("created_at", { ascending: false });
+
+        if (prosData) setProspects(prosData);
+        setIsLoading(false);
+    }, [id]);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
+
+    const handleGenerateEmail = async (prospectId: string) => {
+        setGeneratingId(prospectId);
+        try {
+            const res = await fetch("/api/generate-email", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prospect_id: prospectId, campaign_id: id }),
+            });
+            if (res.ok) {
+                await loadData(); // Reload UI to show email
+            } else {
+                alert("Failed to generate email.");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("An error occurred.");
+        } finally {
+            setGeneratingId(null);
+        }
+    };
+
+    const handleBulkGenerate = async (unemailedProspects: Prospect[]) => {
+        setIsGeneratingBulk(true);
+        for (const prospect of unemailedProspects) {
+            setGeneratingId(prospect.id); // Show spinner per row
+            try {
+                await fetch("/api/generate-email", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ prospect_id: prospect.id, campaign_id: id }),
+                });
+            } catch (error) {
+                console.error(`Failed to generate email for ${prospect.name}`, error);
+            }
+        }
+        await loadData();
+        setIsGeneratingBulk(false);
+        setGeneratingId(null);
+    };
+
+    if (isLoading) return <div className="animate-pulse p-12 text-center text-surface-400">Loading campaign...</div>;
+    if (!campaign && !isLoading) return <div className="p-12 text-center">Campaign Not Found</div>;
+
+    const totalEmails = prospects.reduce((sum, p) => sum + (p.outreach_emails?.length || 0), 0);
+    const unemailedProspects = prospects.filter(p => !p.outreach_emails || p.outreach_emails.length === 0);
 
     return (
         <div className="animate-fade-in">
@@ -37,31 +119,29 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                 <ArrowLeft className="h-4 w-4" /> Back to Campaigns
             </Link>
 
-            {/* Campaign Header */}
-            <div className="glass-card p-6 mb-6">
-                <div className="flex items-start justify-between">
-                    <div>
-                        <div className="flex items-center gap-3 mb-2">
-                            <h1 className="text-2xl font-bold text-surface-100">{campaign.name}</h1>
-                            <span className={`badge ${campaign.status === "active" ? "badge-active" : "badge-draft"}`}>
-                                {campaign.status}
-                            </span>
-                        </div>
-                        <p className="text-sm text-surface-400 max-w-2xl">{campaign.description}</p>
-                        <div className="mt-3 flex gap-4 text-xs text-surface-500">
-                            <span>Type: <span className="text-surface-300 capitalize">{campaign.campaign_type}</span></span>
-                            {campaign.goal_amount && (
-                                <span>Goal: <span className="text-surface-300">${Number(campaign.goal_amount).toLocaleString()}</span></span>
-                            )}
-                            <span>Prospects: <span className="text-surface-300">{prospects?.length ?? 0}</span></span>
-                            <span>Emails: <span className="text-surface-300">{totalEmails}</span></span>
+            {campaign && (
+                <div className="glass-card p-6 mb-6">
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                        <div>
+                            <div className="flex items-center gap-3 mb-2">
+                                <h1 className="text-2xl font-bold text-surface-100">{campaign.name}</h1>
+                                <span className={`badge ${campaign.status === "active" ? "badge-active" : "badge-draft"}`}>
+                                    {campaign.status}
+                                </span>
+                            </div>
+                            <p className="text-sm text-surface-400 max-w-2xl">{campaign.description}</p>
+                            <div className="mt-3 flex gap-4 text-xs text-surface-500">
+                                <span>Type: <span className="text-surface-300 capitalize">{campaign.campaign_type}</span></span>
+                                {campaign.goal_amount && (
+                                    <span>Goal: <span className="text-surface-300">${Number(campaign.goal_amount).toLocaleString()}</span></span>
+                                )}
+                                <span>Prospects: <span className="text-surface-300">{prospects?.length ?? 0}</span></span>
+                                <span>Emails: <span className="text-surface-300">{totalEmails}</span></span>
+                            </div>
                         </div>
                     </div>
-                    <Link href={`/dashboard/campaigns/${id}/prospect`} className="btn-primary shrink-0">
-                        <Search className="h-4 w-4" /> Find Prospects
-                    </Link>
                 </div>
-            </div>
+            )}
 
             {/* Prospects */}
             {(!prospects || prospects.length === 0) ? (
@@ -75,11 +155,33 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                 </div>
             ) : (
                 <div className="space-y-3">
-                    <h2 className="text-lg font-semibold text-surface-200">Prospects ({prospects.length})</h2>
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-semibold text-surface-200">Prospects ({prospects.length})</h2>
+                        <div className="flex items-center gap-3">
+                            <Link href={`/dashboard/campaigns/${id}/prospect`} className="btn-secondary">
+                                <Search className="h-4 w-4" /> Find More Prospects
+                            </Link>
+
+                            {unemailedProspects.length > 0 && (
+                                <button
+                                    onClick={() => handleBulkGenerate(unemailedProspects)}
+                                    disabled={isGeneratingBulk}
+                                    className="btn-primary"
+                                >
+                                    {isGeneratingBulk ? (
+                                        <><Loader2 className="h-4 w-4 animate-spin" /> Generating Emals...</>
+                                    ) : (
+                                        <><Play className="h-4 w-4" /> Bulk Generate Emails ({unemailedProspects.length})</>
+                                    )}
+                                </button>
+                            )}
+                        </div>
+                    </div>
                     {prospects.map((prospect, i) => {
                         const enrichment = Array.isArray(prospect.enrichments) ? prospect.enrichments[0] : prospect.enrichments;
                         const emails = prospect.outreach_emails as Array<Record<string, unknown>> | null;
                         const hasEmail = emails && emails.length > 0;
+                        const isGeneratingThis = generatingId === prospect.id;
 
                         return (
                             <div
@@ -121,17 +223,19 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                                             <p className="mt-2 text-xs text-surface-400 line-clamp-2">{enrichment.summary}</p>
                                         )}
                                     </div>
-                                    <div className="flex items-center gap-2 shrink-0">
-                                        {!enrichment && prospect.website && (
-                                            <span className="badge bg-amber-500/10 text-amber-400 text-[10px]">Not enriched</span>
-                                        )}
-                                        {enrichment && !hasEmail && (
-                                            <span className="badge bg-brand-500/10 text-brand-300 text-[10px]">Ready for email</span>
-                                        )}
-                                        {hasEmail && (
-                                            <span className="badge badge-sent text-[10px]">
-                                                <Mail className="h-3 w-3 mr-1" /> Email generated
+                                    <div className="flex items-center gap-3 shrink-0">
+                                        {hasEmail ? (
+                                            <span className="badge badge-sent py-2">
+                                                <Mail className="h-3 w-3 mr-1" /> Email Generated
                                             </span>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleGenerateEmail(prospect.id)}
+                                                disabled={isGeneratingThis || isGeneratingBulk}
+                                                className="btn-secondary py-1 px-3 text-sm h-[32px]"
+                                            >
+                                                {isGeneratingThis ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Generate Email"}
+                                            </button>
                                         )}
                                     </div>
                                 </div>
