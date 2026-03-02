@@ -55,8 +55,14 @@ export default function HomePage() {
 
             {/* ── Hero ───────────────────────────────────────── */}
             <section className="relative overflow-hidden pt-32 pb-20">
-                {/* Background effects */}
+                {/* Background effects with generated image */}
                 <div className="absolute inset-0 -z-10">
+                    <img
+                        src="/hero-bg.png"
+                        alt="Church basket raffle community event"
+                        className="absolute inset-0 h-full w-full object-cover opacity-20 mix-blend-luminosity"
+                    />
+                    <div className="absolute inset-0 bg-surface-950/80 bg-gradient-to-b from-surface-950/50 via-surface-950/80 to-surface-950" />
                     <div className="absolute top-1/4 left-1/4 h-96 w-96 rounded-full bg-brand-600/20 blur-[128px]" />
                     <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-purple-600/15 blur-[128px]" />
                 </div>
