@@ -80,8 +80,9 @@ export default function HomePage() {
                         </h1>
 
                         <p className="mx-auto mt-6 max-w-2xl text-lg text-surface-400 leading-relaxed">
-                            SponsorMyThing helps non-profits, PTAs, and youth sports leagues discover nearby
-                            businesses and send AI-personalized sponsorship emails — in minutes, not weeks.
+                            SponsorMyThing helps bring your events come to life by partnering with nearby
+                            businesses. We send AI-personalized sponsorship emails in seconds where you can
+                            receive sponsorships in minutes and not weeks.
                         </p>
 
                         <div className="mt-10 flex items-center justify-center gap-4">
