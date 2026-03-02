@@ -1,43 +1,34 @@
 @import "tailwindcss";
 
 @theme {
-  /* USWDS VA.gov Color Palette */
-  --color-brand-50: #e1f3f8;
-  --color-brand-100: #bfe5ee;
-  --color-brand-200: #88c7d6;
-  --color-brand-300: #4f96d1;
-  --color-brand-400: #2378c3;
-  --color-brand-500: #005ea2;
-  /* Action Blue */
-  --color-brand-600: #1a4480;
-  /* Dark Blue */
-  --color-brand-700: #162e51;
-  /* Darkest Blue */
-  --color-brand-800: #112e51;
-  --color-brand-900: #0b1c31;
+  --color-brand-50: #fef2f2;
+  --color-brand-100: #fee2e2;
+  --color-brand-200: #fecaca;
+  --color-brand-300: #fca5a5;
+  --color-brand-400: #f87171;
+  --color-brand-500: #ef4444;
+  --color-brand-600: #dc2626;
+  --color-brand-700: #b91c1c;
+  --color-brand-800: #991b1b;
+  --color-brand-900: #7f1d1d;
 
-  --color-surface-50: #f0f0f0;
-  /* Lightest Gray */
-  --color-surface-100: #dfe1e2;
-  --color-surface-200: #a9aeb1;
-  --color-surface-300: #757575;
-  /* Medium Gray */
-  --color-surface-400: #565c65;
-  /* Dark Gray */
-  --color-surface-500: #3d4551;
-  --color-surface-600: #2e2e2e;
-  --color-surface-700: #1b1b1b;
-  /* Text Gray/Black */
-  --color-surface-800: #111111;
-  --color-surface-900: #000000;
-  --color-surface-950: #000000;
+  --color-surface-50: #f8fafc;
+  --color-surface-100: #f1f5f9;
+  --color-surface-200: #e2e8f0;
+  --color-surface-300: #cbd5e1;
+  --color-surface-400: #94a3b8;
+  --color-surface-500: #64748b;
+  --color-surface-600: #475569;
+  --color-surface-700: #334155;
+  --color-surface-800: #1e293b;
+  --color-surface-900: #0f172a;
+  --color-surface-950: #020617;
 
-  --color-success: #00a91c;
-  --color-warning: #fac60a;
-  --color-danger: #d83933;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
 
-  --font-sans: var(--font-source-sans), "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-bitter), "Bitter", ui-serif, Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* ── Base ─────────────────────────────────────────────────── */
@@ -47,111 +38,158 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background: #ffffff;
-  color: var(--color-surface-700);
+  background: var(--color-surface-950);
+  color: var(--color-surface-100);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-serif);
-  color: var(--color-surface-700);
-  font-weight: 700;
+/* ── Animations ───────────────────────────────────────────── */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* ── Utilities ───────────────────────────────────────────── */
-.bg-va-dark {
-  background-color: var(--color-brand-700);
-  color: #ffffff;
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-/* ── USWDS Cards ───────────────────────────────────────────── */
-.glass-card,
-.card {
-  background: #ffffff;
-  border: 1px solid var(--color-surface-100);
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
+  }
+
+  50% {
+    box-shadow: 0 0 40px rgba(239, 68, 68, 0.3);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out both;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.4s ease-out both;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* ── Glass Card ───────────────────────────────────────────── */
+.glass-card {
+  background: rgba(30, 41, 59, 0.5);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 16px;
 }
 
 .glass-card-hover {
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .glass-card-hover:hover {
-  border-color: var(--color-brand-500);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+  background: rgba(30, 41, 59, 0.7);
+  border-color: rgba(239, 68, 68, 0.3);
+  box-shadow: 0 8px 32px rgba(239, 68, 68, 0.1);
+  transform: translateY(-2px);
 }
 
-/* ── Gradient Text to Flat ─────────────────────────────────── */
+/* ── Gradient Text ────────────────────────────────────────── */
 .gradient-text {
-  color: var(--color-brand-700);
+  background: linear-gradient(135deg, #f87171 0%, #fb923c 50%, #f43f5e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-/* ── USWDS Buttons ──────────────────────────────────────────────── */
+/* ── Buttons ──────────────────────────────────────────────── */
 .btn-primary {
-  background: var(--color-brand-500);
-  color: #ffffff;
-  padding: 0.75rem 1.25rem;
-  border-radius: 4px;
-  font-weight: 700;
-  font-size: 1rem;
-  transition: background-color 0.2s ease;
+  background: linear-gradient(135deg, var(--color-brand-600) 0%, var(--color-brand-500) 100%);
+  color: white;
+  padding: 0.625rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
   border: none;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 0.5rem;
 }
 
 .btn-primary:hover {
-  background: var(--color-brand-600);
+  background: linear-gradient(135deg, var(--color-brand-500) 0%, var(--color-brand-400) 100%);
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+  transform: translateY(-1px);
 }
 
 .btn-primary:active {
-  background: var(--color-brand-700);
+  transform: translateY(0);
 }
 
 .btn-secondary {
-  background: transparent;
-  color: var(--color-brand-500);
-  padding: 0.75rem 1.25rem;
-  border-radius: 4px;
-  font-weight: 700;
-  font-size: 1rem;
+  background: rgba(148, 163, 184, 0.1);
+  color: var(--color-surface-200);
+  padding: 0.625rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.875rem;
   transition: all 0.2s ease;
-  border: 2px solid var(--color-brand-500);
+  border: 1px solid rgba(148, 163, 184, 0.15);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 0.5rem;
 }
 
 .btn-secondary:hover {
-  background: rgba(0, 94, 162, 0.05);
-  box-shadow: inset 0 0 0 1px var(--color-brand-500);
+  background: rgba(148, 163, 184, 0.2);
+  border-color: rgba(148, 163, 184, 0.3);
 }
 
-/* ── USWDS Inputs ───────────────────────────────────────────────── */
+/* ── Inputs ───────────────────────────────────────────────── */
 .input-field {
   width: 100%;
-  padding: 0.75rem;
-  background: #ffffff;
-  border: 1px solid var(--color-surface-400);
-  border-radius: 0;
-  color: var(--color-surface-700);
-  font-size: 1rem;
-  transition: border-color 0.2s ease, outline 0.2s ease;
+  padding: 0.625rem 1rem;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 12px;
+  color: var(--color-surface-100);
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
   outline: none;
 }
 
+/* Ensure icon inputs have enough left padding */
 .input-field.pl-10 {
   padding-left: 2.5rem !important;
 }
@@ -161,41 +199,41 @@ h6 {
 }
 
 .input-field::placeholder {
-  color: var(--color-surface-400);
+  color: var(--color-surface-500);
 }
 
 .input-field:focus {
   border-color: var(--color-brand-500);
-  outline: 4px solid var(--color-brand-100);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
 }
 
-/* ── Status Badges ───────────────────────────────────────── */
+/* ── Status Badges ────────────────────────────────────────── */
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.5rem;
-  border-radius: 2px;
-  font-size: 0.875rem;
-  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
   letter-spacing: 0.025em;
 }
 
 .badge-active {
-  background: var(--color-success);
-  color: #ffffff;
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
 }
 
 .badge-draft {
-  background: var(--color-warning);
-  color: var(--color-surface-700);
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
 }
 
 .badge-sent {
-  background: var(--color-brand-200);
-  color: var(--color-surface-700);
+  background: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
 }
 
 .badge-rejected {
-  background: var(--color-danger);
-  color: #ffffff;
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
 }
