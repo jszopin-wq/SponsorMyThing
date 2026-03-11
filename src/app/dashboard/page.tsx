@@ -3,6 +3,9 @@ import { isAdmin } from "@/lib/admin";
 import Link from "next/link";
 import { Megaphone, Search, Mail, ArrowRight, Plus, TrendingUp, Users, Shield, Play } from "lucide-react";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function DashboardPage() {
     const supabase = await createClient();
 
