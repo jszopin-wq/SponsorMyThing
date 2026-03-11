@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useEffect, useState, useCallback, use } from "react";
-import { ArrowLeft, Search, Mail, Globe, Phone, MapPin, Star, ExternalLink, Loader2, Play } from "lucide-react";
+import { ArrowLeft, Search, Mail, Globe, Phone, MapPin, Star, ExternalLink, Loader2, Play, Megaphone } from "lucide-react";
 
 interface Campaign {
     id: string;
@@ -32,6 +32,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
 
     const [campaign, setCampaign] = useState<Campaign | null>(null);
     const [prospects, setProspects] = useState<Prospect[]>([]);
+    const [prosError, setProsError] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isGeneratingBulk, setIsGeneratingBulk] = useState(false);
     const [generatingId, setGeneratingId] = useState<string | null>(null);
@@ -50,12 +51,15 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
 
         if (campData) setCampaign(campData);
 
-        const { data: prosData } = await supabase
+        const { data: prosData, error: prosError } = await supabase
             .from("prospects")
             .select("*, enrichments(*), outreach_emails(*)")
             .eq("campaign_id", id)
             .order("created_at", { ascending: false });
 
+        console.log("PROSPECTS QUERY:", { prosData, prosError, id });
+
+        if (prosError) setProsError(prosError);
         if (prosData) setProspects(prosData);
         setIsLoading(false);
     }, [id]);
@@ -144,7 +148,13 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
             )}
 
             {/* Prospects */}
-            {(!prospects || prospects.length === 0) ? (
+            {prosError ? (
+                <div className="glass-card p-12 text-center border-red-500/30">
+                    <Megaphone className="mx-auto h-12 w-12 text-red-500/70 mb-4" />
+                    <h3 className="text-lg font-semibold text-surface-300">Error loading prospects</h3>
+                    <p className="mt-1 text-sm text-surface-500 mb-6">{prosError.message}</p>
+                </div>
+            ) : (!prospects || prospects.length === 0) ? (
                 <div className="glass-card p-12 text-center">
                     <Search className="mx-auto h-12 w-12 text-surface-600 mb-4" />
                     <h3 className="text-lg font-semibold text-surface-300">No prospects yet</h3>
