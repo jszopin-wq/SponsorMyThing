@@ -24,15 +24,22 @@ export async function GET(request: NextRequest) {
             `https://nominatim.openstreetmap.org/search?format=json&${nominatimQuery}`,
             { headers: { "User-Agent": "SponsorMyThing/1.0" } }
         );
+
+        if (!geocodeRes.ok) {
+            console.error("Geocode HTTP Error:", geocodeRes.status, await geocodeRes.text());
+            return NextResponse.json({ error: "Location search failed." }, { status: 500 });
+        }
+
         const geocodeData = await geocodeRes.json();
+        console.log("Geocode Data length:", geocodeData?.length);
 
         if (!geocodeData || geocodeData.length === 0) {
             return NextResponse.json({ error: "Location not found. Try a different ZIP code or city." }, { status: 404 });
         }
 
         // Get Lat and Lon
-        const lat = geocodeData[0].lat;
-        const lon = geocodeData[0].lon;
+        const lat = Math.round(geocodeData[0].lat * 100000) / 100000;
+        const lon = Math.round(geocodeData[0].lon * 100000) / 100000;
 
         // Convert distance from miles to meters (default to 5 miles if not specified)
         const miles = distanceParam ? parseFloat(distanceParam) : 5;
@@ -55,8 +62,17 @@ export async function GET(request: NextRequest) {
 
         const overpassRes = await fetch("https://overpass-api.de/api/interpreter", {
             method: "POST",
+            headers: {
+                "User-Agent": "SponsorMyThing/1.0 (sponsormything.com)",
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
             body: query,
         });
+
+        if (!overpassRes.ok) {
+            console.error("Overpass HTTP Error:", overpassRes.status, await overpassRes.text());
+            throw new Error("Overpass API HTTP Error: " + overpassRes.status);
+        }
 
         const overpassData = await overpassRes.json();
 
