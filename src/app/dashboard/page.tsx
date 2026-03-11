@@ -58,20 +58,6 @@ export default async function DashboardPage() {
             description: "Start a new sponsorship or donation campaign",
             color: "from-brand-500 to-orange-500",
         },
-        {
-            href: "/dashboard/campaigns",
-            icon: Search,
-            title: "Find Prospects",
-            description: "Search for local businesses near you",
-            color: "from-red-500 to-orange-400",
-        },
-        {
-            href: "/dashboard/outreach",
-            icon: Mail,
-            title: "View Outreach",
-            description: "Review and send generated emails",
-            color: "from-pink-500 to-rose-400",
-        },
     ];
 
     if (recentCampaign) {
@@ -143,7 +129,7 @@ export default async function DashboardPage() {
 
             {/* Quick Actions */}
             <div className="mb-4">
-                <h2 className="text-lg font-semibold text-surface-200">Quick Actions</h2>
+                <h2 className="text-lg font-semibold text-surface-200">Step 1</h2>
             </div>
             <div className="grid gap-4 sm:grid-cols-3">
                 {quickActions.map((action) => (
