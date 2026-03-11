@@ -21,6 +21,7 @@ interface Prospect {
     category?: string;
     rating?: number;
     address?: string;
+    email?: string;
     phone?: string;
     website?: string;
     enrichments?: Array<{ summary: string }> | { summary: string };
@@ -216,6 +217,11 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                                             {prospect.address && (
                                                 <span className="inline-flex items-center gap-1">
                                                     <MapPin className="h-3 w-3" /> {prospect.address}
+                                                </span>
+                                            )}
+                                            {prospect.email && (
+                                                <span className="inline-flex items-center gap-1 break-all">
+                                                    <Mail className="h-3 w-3" /> {prospect.email}
                                                 </span>
                                             )}
                                             {prospect.phone && (

@@ -14,12 +14,14 @@ import {
     Star,
     Globe,
     Phone,
+    Mail,
 } from "lucide-react";
 
 interface PlaceResult {
     place_id: string;
     name: string;
     address: string;
+    email?: string;
     phone?: string;
     website?: string;
     category?: string;
@@ -92,6 +94,7 @@ export default function ProspectSearchPage() {
             website: place.website,
             category: place.category,
             rating: place.rating,
+            email: place.email,
         });
 
         if (!insertError) {
@@ -240,6 +243,7 @@ export default function ProspectSearchPage() {
                                                     website: place.website,
                                                     category: place.category,
                                                     rating: place.rating,
+                                                    email: place.email,
                                                 })
                                             ));
 
@@ -278,6 +282,11 @@ export default function ProspectSearchPage() {
                                                     {place.address && (
                                                         <span className="flex items-start gap-1.5">
                                                             <MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5" /> <span className="line-clamp-2">{place.address}</span>
+                                                        </span>
+                                                    )}
+                                                    {place.email && (
+                                                        <span className="flex items-center gap-1.5 break-all">
+                                                            <Mail className="h-3.5 w-3.5 shrink-0" /> {place.email}
                                                         </span>
                                                     )}
                                                     {place.phone && (
