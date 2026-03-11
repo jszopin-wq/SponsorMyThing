@@ -32,7 +32,7 @@ export default async function ProspectsPage() {
                 </div>
             ) : (
                 <div className="space-y-4">
-                    <p className="text-sm text-surface-400">Select a campaign to search for prospects:</p>
+                    <p className="text-sm text-surface-400">Select a campaign to view or add prospects:</p>
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                         {campaigns.map((campaign) => {
                             const prospectArr = campaign.prospects as Array<{ count: number }> | null;
@@ -41,7 +41,7 @@ export default async function ProspectsPage() {
                             return (
                                 <Link
                                     key={campaign.id}
-                                    href={`/dashboard/campaigns/${campaign.id}/prospect`}
+                                    href={`/dashboard/campaigns/${campaign.id}`}
                                     className="glass-card glass-card-hover p-5 group"
                                 >
                                     <div className="flex items-center gap-3 mb-2">
