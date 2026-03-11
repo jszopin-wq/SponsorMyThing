@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     try {
         // Step 1: Geocode the location to a bounding box using Nominatim (Free)
         const geocodeRes = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`,
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&countrycodes=US`,
             { headers: { "User-Agent": "SponsorMyThing/1.0" } }
         );
         const geocodeData = await geocodeRes.json();
