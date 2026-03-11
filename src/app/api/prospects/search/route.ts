@@ -15,8 +15,13 @@ export async function GET(request: NextRequest) {
 
     try {
         // Step 1: Geocode the location to a bounding box using Nominatim (Free)
+        const isZipCode = /^\d{5}(-\d{4})?$/.test(location.trim());
+        const nominatimQuery = isZipCode
+            ? `postalcode=${encodeURIComponent(location.trim())}&countrycodes=US`
+            : `q=${encodeURIComponent(location.trim())}&countrycodes=US`;
+
         const geocodeRes = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&countrycodes=US`,
+            `https://nominatim.openstreetmap.org/search?format=json&${nominatimQuery}`,
             { headers: { "User-Agent": "SponsorMyThing/1.0" } }
         );
         const geocodeData = await geocodeRes.json();
