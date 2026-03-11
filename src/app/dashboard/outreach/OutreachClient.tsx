@@ -10,7 +10,7 @@ interface EmailData {
     subject: string;
     body: string;
     status: string;
-    prospects?: { name?: string; address?: string };
+    prospects?: { name?: string; address?: string; email?: string };
     campaigns?: { name?: string };
 }
 
@@ -124,7 +124,7 @@ export default function OutreachClient({ initialEmails }: { initialEmails: Email
                                             <span className={`badge ${statusBadge(email.status)}`}>{email.status}</span>
                                         </div>
                                         <p className="text-xs text-surface-500 mb-2">
-                                            Campaign: {campaign?.name || "—"} • {prospect?.address || ""}
+                                            Campaign: {campaign?.name || "—"} {prospect?.address && `• ${prospect.address}`} {prospect?.email && `• ${prospect.email}`}
                                         </p>
                                         <p className="text-sm font-medium text-surface-200 mb-1">
                                             Subject: {email.subject || "(no subject)"}

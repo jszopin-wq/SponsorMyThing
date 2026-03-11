@@ -7,7 +7,7 @@ export default async function OutreachPage() {
 
     const { data: emails } = await supabase
         .from("outreach_emails")
-        .select("*, prospects(name, address), campaigns(name)")
+        .select("*, prospects(name, address, email), campaigns(name)")
         .eq("campaigns.user_id", user?.id ?? "")
         .order("created_at", { ascending: false });
 
